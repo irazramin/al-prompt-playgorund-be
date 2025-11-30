@@ -4,7 +4,6 @@ import config from './index';
 
 export const connectDatabase = async (): Promise<void> => {
   try {
-    console.log(config.db.uri)
     await mongoose.connect(config.db.uri);
     logger.info('MongoDB connected successfully');
   } catch (error) {
@@ -13,7 +12,6 @@ export const connectDatabase = async (): Promise<void> => {
   }
 };
 
-// Handle connection events
 mongoose.connection.on('connected', () => {
   logger.info('Mongoose connected to MongoDB');
 });
@@ -26,7 +24,6 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('Mongoose disconnected from MongoDB');
 });
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   await mongoose.connection.close();
   logger.info('Mongoose connection closed due to app termination');

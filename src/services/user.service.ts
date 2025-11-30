@@ -36,7 +36,6 @@ export const updateProfile = async (
   userId: string,
   updates: { name?: string; email?: string }
 ): Promise<UserResponse> => {
-  // Check if email is being updated and if it's already taken
   if (updates.email) {
     const existingUser = await User.findOne({ email: updates.email });
     if (existingUser && existingUser._id.toString() !== userId) {
@@ -81,7 +80,6 @@ export const changePassword = async (
     throw error;
   }
 
-  // Verify current password
   const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
   if (!isPasswordValid) {
@@ -90,13 +88,10 @@ export const changePassword = async (
     throw error;
   }
 
-  // Hash new password
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  // Update password
   user.password = hashedPassword;
   await user.save();
 
-  // Invalidate all refresh tokens for security
   await RefreshToken.deleteMany({ userId });
 };

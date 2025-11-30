@@ -14,7 +14,7 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
       return ResponseHandler.badRequest(res, 'Validation failed', validation.errors);
     }
 
-    console.log(chatId);
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -48,8 +48,6 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
 
 
     } catch (streamError: any) {
-      console.error('Stream error:', streamError);
-
       let errorMessage = 'Failed to generate response';
       if (streamError.code === 'insufficient_quota') {
         errorMessage = 'OpenAI API quota exceeded. Please check your billing details.';
@@ -61,7 +59,6 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
       res.end();
     }
   } catch (error) {
-    console.error('Controller error:', error);
     next(error);
   }
 };
@@ -79,7 +76,6 @@ export const getChats = async (req: Request, res: Response, next: NextFunction):
 
     return ResponseHandler.success(res, result);
   } catch (error) {
-    console.error('Get chats error:', error);
     next(error);
   }
 };
@@ -96,7 +92,6 @@ export const getChatMessages = async (req: Request, res: Response, next: NextFun
 
     return ResponseHandler.success(res, messages);
   } catch (error: any) {
-    console.error('Get chat messages error:', error);
     if (error.message === 'Chat not found or unauthorized') {
       return ResponseHandler.notFound(res, error.message);
     }
@@ -117,7 +112,6 @@ export const enhancePrompt = async (req: Request, res: Response, next: NextFunct
 
     return ResponseHandler.success(res, { enhancedPrompt });
   } catch (error) {
-    console.error('Enhance prompt error:', error);
     next(error);
   }
 };
@@ -143,7 +137,6 @@ export const updateConversationTitle = async (req: Request, res: Response, next:
 
     return ResponseHandler.success(res, updatedConversation);
   } catch (error: any) {
-    console.error('Update conversation title error:', error);
     if (error.message === 'Chat not found or unauthorized') {
       return ResponseHandler.notFound(res, error.message);
     }
@@ -163,7 +156,6 @@ export const deleteConversation = async (req: Request, res: Response, next: Next
 
     return ResponseHandler.success(res, result);
   } catch (error: any) {
-    console.error('Delete conversation error:', error);
     if (error.message === 'Chat not found or unauthorized') {
       return ResponseHandler.notFound(res, error.message);
     }

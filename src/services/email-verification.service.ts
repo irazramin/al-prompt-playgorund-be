@@ -26,7 +26,6 @@ export const verifyEmail = async (token: string): Promise<void> => {
   try {
     await sendWelcomeEmail(user.email, user.name);
   } catch (error) {
-    console.error('Failed to send welcome email:', error);
   }
 };
 

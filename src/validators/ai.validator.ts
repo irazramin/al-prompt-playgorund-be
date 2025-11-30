@@ -13,8 +13,6 @@ const SUPPORTED_MODELS = [
 export const validateGenerateRequest = (prompt: string, model: string, temperature: number, provider: string): ValidationResult => {
   const errors: string[] = [];
 
-  console.log(model, SUPPORTED_MODELS)
-
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     errors.push('Prompt is required and cannot be empty');
   }

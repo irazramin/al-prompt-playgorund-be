@@ -63,3 +63,11 @@ node-express-starter/
 ### Email Verification
 - `GET /api/v1/email/verify?token=xxx` - Verify email address
 - `POST /api/v1/email/resend-verification` - Resend verification email
+
+### AI Prompt Playground
+- `POST /api/v1/ai/generate/stream` - Generate AI responses with streaming (SSE)
+- `GET /api/v1/ai/chats` - Get chat history (requires authentication)
+- `GET /api/v1/ai/chats/:chatId` - Get messages for a specific chat (requires authentication)
+- `POST /api/v1/ai/enhance-prompt` - Enhance user prompts using AI
+- `PATCH /api/v1/ai/chats/:chatId/title` - Update conversation title (requires authentication)
+- `DELETE /api/v1/ai/chats/:chatId` - Delete conversation (requires authentication)
