@@ -100,28 +100,3 @@ export const changePassword = async (
   // Invalidate all refresh tokens for security
   await RefreshToken.deleteMany({ userId });
 };
-
-export const deleteProfile = async (userId: string, password: string): Promise<void> => {
-  const user = await User.findById(userId);
-
-  if (!user) {
-    const error: any = new Error(USER_MESSAGES.USER_NOT_FOUND);
-    error.statusCode = StatusCodes.NOT_FOUND;
-    throw error;
-  }
-
-  // Verify password before deletion
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  if (!isPasswordValid) {
-    const error: any = new Error(USER_MESSAGES.PASSWORD_INCORRECT);
-    error.statusCode = StatusCodes.UNAUTHORIZED;
-    throw error;
-  }
-
-  // Delete all refresh tokens
-  await RefreshToken.deleteMany({ userId });
-
-  // Delete user
-  await User.findByIdAndDelete(userId);
-};

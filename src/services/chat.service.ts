@@ -97,3 +97,17 @@ export const updateConversationTitle = async (chatId: string, userId: string, ne
 
     return conversation;
 }
+
+export const deleteConversation = async (chatId: string, userId: string) => {
+    const conversation = await Conversation.findOne({ _id: chatId, userId });
+
+    if (!conversation) {
+        throw new Error('Chat not found or unauthorized');
+    }
+
+    await Ai.deleteMany({ chatId });
+
+    await Conversation.findByIdAndDelete(chatId);
+
+    return { message: 'Conversation deleted successfully' };
+}

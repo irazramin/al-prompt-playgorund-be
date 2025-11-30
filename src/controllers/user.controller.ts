@@ -66,23 +66,3 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
-
-export const deleteProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    if (!req.user) {
-      return ResponseHandler.unauthorized(res, AUTH_MESSAGES.UNAUTHORIZED);
-    }
-
-    const { password } = req.body;
-
-    if (!password) {
-      return ResponseHandler.badRequest(res, USER_MESSAGES.PASSWORD_REQUIRED_DELETE);
-    }
-
-    await userService.deleteProfile(req.user._id.toString(), password);
-
-    ResponseHandler.success(res, undefined, USER_MESSAGES.ACCOUNT_DELETED);
-  } catch (error) {
-    next(error);
-  }
-};

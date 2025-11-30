@@ -24,17 +24,14 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // User is already authenticated by Passport local strategy
     if (!req.user) {
       return ResponseHandler.unauthorized(res, AUTH_MESSAGES.AUTHENTICATION_FAILED);
     }
 
     const tokens = await authService.generateTokens(req.user._id.toString(), req.user.email);
 
-    // Don't send password in response
     const { password: _, ...userWithoutPassword } = req.user.toObject();
 
-    // Set cookies
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -57,7 +54,6 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
 export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Get refresh token from body or cookie
     const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -66,19 +62,18 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 
     const tokens = await authService.refreshToken(refreshToken);
 
-    // Update cookies with new tokens
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     ResponseHandler.success(res, tokens, AUTH_MESSAGES.TOKEN_REFRESHED);
@@ -95,7 +90,6 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
 
     await authService.logout(req.user._id.toString());
 
-    // Clear cookies
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
 

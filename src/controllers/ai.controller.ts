@@ -151,3 +151,24 @@ export const updateConversationTitle = async (req: Request, res: Response, next:
   }
 };
 
+export const deleteConversation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { chatId } = req.params;
+
+    if (!req.user) {
+      return ResponseHandler.unauthorized(res, 'Authentication required');
+    }
+
+    const result = await chatService.deleteConversation(chatId, req.user._id.toString());
+
+    return ResponseHandler.success(res, result);
+  } catch (error: any) {
+    console.error('Delete conversation error:', error);
+    if (error.message === 'Chat not found or unauthorized') {
+      return ResponseHandler.notFound(res, error.message);
+    }
+    next(error);
+  }
+};
+
+
