@@ -10,6 +10,7 @@ export interface IAi extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  firstMessage: boolean;
 }
 
 const userSchema = new Schema<IAi>(
@@ -44,6 +45,11 @@ const userSchema = new Schema<IAi>(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User'
+    },
+    firstMessage: {
+      type: Boolean,
+      required: true,
+      default: false
     }
   },
   {

@@ -1,17 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 import { validateGenerateRequest } from '../validators/ai.validator';
-import { generateResponseStream } from '../services/ai/ai.service';
+import { generateResponseStream } from '../services/ai/aiGenerate.service';
 import ResponseHandler from '../helpers/response.helper';
+import { saveChat } from '../services/chat.service';
+import * as chatService from '../services/chat.service';
 
 export const generateStream = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { provider, prompt, aiModel, temperature } = req.body;
+    const { provider, prompt, aiModel, temperature, chatId, userId } = req.body;
 
     const validation = validateGenerateRequest(prompt, aiModel, temperature, provider);
     if (!validation.isValid) {
       return ResponseHandler.badRequest(res, 'Validation failed', validation.errors);
     }
 
+    console.log(chatId);
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -24,7 +27,7 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
     };
 
     try {
-      await generateResponseStream(
+      const fullResponse = await generateResponseStream(
         provider,
         prompt,
         aiModel,
@@ -40,6 +43,10 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
       });
 
       res.end();
+
+      await saveChat(chatId, prompt, fullResponse, userId, aiModel, temperature);
+
+
     } catch (streamError: any) {
       console.error('Stream error:', streamError);
 
@@ -55,6 +62,44 @@ export const generateStream = async (req: Request, res: Response, next: NextFunc
     }
   } catch (error) {
     console.error('Controller error:', error);
+    next(error);
+  }
+};
+
+export const getChats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    if (!req.user) {
+      return ResponseHandler.unauthorized(res, 'Authentication required');
+    }
+
+    const result = await chatService.getChatList(req.user._id.toString(), page, limit);
+
+    return ResponseHandler.success(res, result);
+  } catch (error) {
+    console.error('Get chats error:', error);
+    next(error);
+  }
+};
+
+export const getChatMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { chatId } = req.params;
+
+    if (!req.user) {
+      return ResponseHandler.unauthorized(res, 'Authentication required');
+    }
+
+    const messages = await chatService.getChatMessages(chatId, req.user._id.toString());
+
+    return ResponseHandler.success(res, messages);
+  } catch (error: any) {
+    console.error('Get chat messages error:', error);
+    if (error.message === 'Chat not found or unauthorized') {
+      return ResponseHandler.notFound(res, error.message);
+    }
     next(error);
   }
 };
