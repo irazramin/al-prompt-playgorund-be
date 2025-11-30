@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { validateGenerateRequest } from '../validators/ai.validator';
-import { generateResponseStream } from '../services/ai/aiGenerate.service';
+import { generateResponseStream, enhancePrompt as enhancePromptService } from '../services/ai/aiGenerate.service';
 import ResponseHandler from '../helpers/response.helper';
 import { saveChat } from '../services/chat.service';
 import * as chatService from '../services/chat.service';
@@ -103,3 +103,51 @@ export const getChatMessages = async (req: Request, res: Response, next: NextFun
     next(error);
   }
 };
+
+export const enhancePrompt = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { provider, prompt, aiModel, temperature } = req.body;
+
+    const validation = validateGenerateRequest(prompt, aiModel, temperature, provider);
+    if (!validation.isValid) {
+      return ResponseHandler.badRequest(res, 'Validation failed', validation.errors);
+    }
+
+    const enhancedPrompt = await enhancePromptService(provider, prompt, aiModel, temperature);
+
+    return ResponseHandler.success(res, { enhancedPrompt });
+  } catch (error) {
+    console.error('Enhance prompt error:', error);
+    next(error);
+  }
+};
+
+export const updateConversationTitle = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { chatId } = req.params;
+    const { title } = req.body;
+
+    if (!req.user) {
+      return ResponseHandler.unauthorized(res, 'Authentication required');
+    }
+
+    if (!title || title.trim() === '') {
+      return ResponseHandler.badRequest(res, 'Title is required');
+    }
+
+    const updatedConversation = await chatService.updateConversationTitle(
+      chatId,
+      req.user._id.toString(),
+      title.trim()
+    );
+
+    return ResponseHandler.success(res, updatedConversation);
+  } catch (error: any) {
+    console.error('Update conversation title error:', error);
+    if (error.message === 'Chat not found or unauthorized') {
+      return ResponseHandler.notFound(res, error.message);
+    }
+    next(error);
+  }
+};
+

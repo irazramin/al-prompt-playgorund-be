@@ -27,4 +27,18 @@ export class OpenAIProvider extends BaseAIProvider {
             if (content) onChunk(content);
         }
     }
+
+    async generate(
+        prompt: string,
+        config: AIStreamConfig
+    ): Promise<string> {
+        const response = await this.client.chat.completions.create({
+            model: config.model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: config.temperature,
+            stream: false,
+        });
+
+        return response.choices[0]?.message?.content || '';
+    }
 }

@@ -6,4 +6,9 @@ export abstract class BaseAIProvider {
         config: AIStreamConfig,
         onChunk: (chunk: string) => void
     ): Promise<void>;
+
+    abstract generate(
+        prompt: string,
+        config: AIStreamConfig
+    ): Promise<string>;
 }

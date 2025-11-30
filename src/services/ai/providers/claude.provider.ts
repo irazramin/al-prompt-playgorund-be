@@ -29,4 +29,19 @@ export class ClaudeProvider extends BaseAIProvider {
             }
         }
     }
+
+    async generate(
+        prompt: string,
+        config: AIStreamConfig
+    ): Promise<string> {
+        const response = await this.client.messages.create({
+            model: config.model,
+            max_tokens: config.maxTokens || 1024,
+            temperature: config.temperature,
+            messages: [{ role: 'user', content: prompt }],
+            stream: false,
+        });
+
+        return response.content[0]?.type === 'text' ? response.content[0].text : '';
+    }
 }

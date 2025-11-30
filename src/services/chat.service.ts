@@ -72,17 +72,28 @@ export const getChatList = async (userId: string, page: number = 1, limit: numbe
 }
 
 export const getChatMessages = async (chatId: string, userId: string) => {
-    // Verify the chat belongs to the user
     const conversation = await Conversation.findOne({ chatId, userId });
 
     if (!conversation) {
         throw new Error('Chat not found or unauthorized');
     }
 
-    // Get all messages for this chat
     const messages = await Ai.find({ chatId })
-        .sort({ createdAt: 1 }) // Oldest first
+        .sort({ createdAt: 1 })
         .select('prompt reply aiModel temperature createdAt');
 
     return messages;
+}
+
+export const updateConversationTitle = async (chatId: string, userId: string, newTitle: string) => {
+    const conversation = await Conversation.findOne({ _id: chatId, userId });
+
+    if (!conversation) {
+        throw new Error('Chat not found or unauthorized');
+    }
+
+    conversation.title = newTitle;
+    await conversation.save();
+
+    return conversation;
 }

@@ -27,4 +27,17 @@ export class GeminiProvider extends BaseAIProvider {
             if (text) onChunk(text);
         }
     }
+
+    async generate(
+        prompt: string,
+        config: AIStreamConfig
+    ): Promise<string> {
+        const genModel = this.client.getGenerativeModel({
+            model: config.model,
+            generationConfig: { temperature: config.temperature }
+        });
+
+        const result = await genModel.generateContent(prompt);
+        return result.response.text();
+    }
 }
